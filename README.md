@@ -8,6 +8,11 @@ Shoot: Space / Numpad 5
 Reset: R / Numpad 7  
 Return to menu: Q / Numpad 9
 
+## Upcoming Changes
+* More levels
+* Larger levels with camera movement
+* a better and built-in level editor
+
 ## Level Editor
 This is the editor I use to make the levels. It is everything but polished or finished but if you still want to try to create your own courses, here you go: (Its complicated)
 * Download the repo to your localhost
