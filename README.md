@@ -3,9 +3,9 @@ A little online minigolf type game in the style of the nokia 3310.
 This was made for the Nokia 3310 Game Jam and therefore is not finished or polished at all.
 
 ## Controls
-Move cursor: WASD / Numpad 8,4,2,6
-Shoot: Space / Numpad 5
-Reset: R / Numpad 7
+Move cursor: WASD / Numpad 8,4,2,6  
+Shoot: Space / Numpad 5  
+Reset: R / Numpad 7  
 Return to menu: Q / Numpad 9
 
 ## Level Editor
