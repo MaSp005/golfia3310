@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Wall Builder</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="">
+</head>
+
+<body>
+  <canvas onclick="place()" onmousemove="mouse=[event.layerX-8,event.layerY-8]
+  "></canvas>
+  <script async defer>
+    const canv = document.getElementsByTagName("canvas")[0],
+      ctx = canv.getContext("2d"),
+      w = 84,
+      h = 48,
+      pix = 10,
+      col = ["#c7f0d8", "#43523d", "#f00", "#0f0", "#00f"];
+
+    var mat = [],
+      to = null,
+      clevel = 0,
+      globwalls = [
+        { x: 0, y: 0, a: "x", l: w },
+        { x: 0, y: h - 1, a: "x", l: w },
+        { x: 0, y: 0, a: "y", l: h },
+        { x: w - 1, y: 0, a: "y", l: h }
+      ],
+      walls = [],
+      placing = {
+        stage: 0,
+        x: 0,
+        y: 0,
+        l: 0,
+        a: null
+      },
+      mouse = [];
+
+    canv.width = w * pix;
+    canv.height = h * pix;
+
+    function place() {
+      let mx = Math.floor((mouse[0]) / pix);
+      let my = Math.floor((mouse[1]) / pix);
+      placing.stage++;
+      if (placing.stage == 1) {
+        placing.x = mx;
+        placing.y = my;
+      }
+      if (placing.stage == 2) {
+        if (mx == placing.x) placing.a = "y"
+        else if (my == placing.y) placing.a = "x"
+        else placing.stage--;
+      }
+      if (placing.stage == 3) {
+        if (placing.a == "x") placing.l = Math.abs(mx - placing.x);
+        if (placing.a == "y") placing.l = Math.abs(my - placing.y);
+        delete placing.stage;
+        walls.push({ ...placing });
+        placing.stage = 0
+      }
+    }
+
+    function clearmat() {
+      mat = [];
+      for (x = 0; x < w; x++) {
+        let s = [];
+        for (y = 0; y < h; y++) {
+          s.push(0);
+        }
+        mat.push(s);
+      }
+    }
+
+    function render() {
+      clearmat();
+
+      [...globwalls, ...walls].forEach(w => {
+        // console.log(w.x, w.y, w.a, w.l)
+        if (w.a == "x") {
+          for (x = w.x; x < w.x + w.l; x++) {
+            mat[x][w.y] = 1;
+          }
+        } else {
+          for (y = w.y; y < w.y + w.l; y++) {
+            mat[w.x][y] = 1;
+          }
+        }
+      })
+
+      if (placing.stage == 1 || placing.stage == 2) {
+        mat[placing.x][placing.y] = 2
+      }
+      if (placing.stage == 2) {
+        if (placing.a == "x") mat[placing.x - 1][placing.y] = 2
+        if (placing.a == "x") mat[placing.x + 1][placing.y] = 2
+        if (placing.a == "y") mat[placing.x][placing.y - 1] = 2
+        if (placing.a == "y") mat[placing.x][placing.y + 1] = 2
+      }
+
+      for (x = 0; x < w; x++) {
+        for (y = 0; y < h; y++) {
+          ctx.fillStyle = col[mat[x][y]];
+          ctx.fillRect(x * pix, y * pix, pix, pix);
+          ctx.strokeRect(x * pix, y * pix, pix, pix);
+        }
+      };
+      let mx = Math.floor((mouse[0]) / pix);
+      let my = Math.floor((mouse[1]) / pix);
+      ctx.fillStyle = "#000"
+      ctx.fillText(
+        [mx, my].join() + " | " + [w - mx - 1, h - my - 1].join(),
+        mouse[0], mouse[1]
+      );
+
+      to = setTimeout(render, 100);
+    };
+    clearmat();
+    render();
+  </script>
+</body>
+
+</html>
