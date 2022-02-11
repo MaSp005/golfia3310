@@ -10,6 +10,8 @@ Return to menu: Q / Numpad 9
 
 ## Upcoming Changes
 * More levels
+* Vertical Movement
+* Diagonal Walls
 * Larger levels with camera movement
 * a better and built-in level editor
 
@@ -44,4 +46,4 @@ This is the editor I use to make the levels. It is everything but polished or fi
             startpos: [X, Y]
         }
       ]
-* Now open Golfia 3310 on localhost and your level should be playable now!
+* Now open Golfia 3310 on localhost and your level should be playable!
