@@ -22,8 +22,7 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       goal: { x: w - 8, y: h / 2 },
       startpos: [8, h / 2]
-    },
-    {
+    }, {
       walls: [
         { x: 1, y: 32, l: 34, a: "x" },
         { x: 49, y: 14, l: 34, a: "x" },
@@ -32,9 +31,8 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       goal: { x: w - 8, y: 8 },
       startpos: [8, h - 8]
-    },
-    {
-      walls:[
+    }, {
+      walls: [
         { x: 1, y: 16, l: 82, a: "x" },
         { x: 1, y: 31, l: 82, a: "x" },
         { x: 21, y: 17, l: 8, a: "y" },
@@ -43,8 +41,7 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       goal: { x: w - 8, y: h / 2 },
       startpos: [8, h / 2]
-    },
-    {
+    }, {
       walls: [
         { x: 1, y: 16, l: 28, a: "x" },
         { x: 1, y: 31, l: 41, a: "x" },
@@ -56,8 +53,24 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       startpos: [5, h / 2],
       goal: { x: 64, y: h / 2 }
-    },
-    {
+    }, {
+      walls: [
+        { x: 1, y: 16, l: 21, a: "x" },
+        { x: 1, y: 31, l: 32, a: "x" },
+        { x: 21, y: 1, l: 15, a: "y" },
+        { x: 32, y: 12, l: 19, a: "y" },
+        { x: 33, y: 12, l: 9, a: "x" },
+        { x: 41, y: 13, l: 34, a: "y" },
+        { x: 52, y: 35, l: 10, a: "x" },
+        { x: 52, y: 1, l: 34, a: "y" },
+        { x: 61, y: 16, l: 19, a: "y" },
+        { x: 62, y: 16, l: 21, a: "x" },
+        { x: 72, y: 31, l: 11, a: "x" },
+        { x: 72, y: 32, l: 15, a: "y" }
+      ],
+      goal: { x: w - 8, y: h / 2 },
+      startpos: [8, h / 2]
+    }, {
       walls: [
         { x: 1, y: 16, l: 30, a: "x" },
         { x: 1, y: 31, l: 30, a: "x" },
@@ -74,8 +87,7 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       startpos: [5, h / 2],
       goal: { x: 50, y: h / 2 }
-    },
-    {
+    }, {
       walls: [
         { x: 1, y: 16, l: 28, a: "x" },
         { x: 1, y: 31, l: 28, a: "x" },
@@ -94,8 +106,7 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       startpos: [5, h / 2],
       goal: { x: w - 5, y: h / 2 }
-    },
-    {
+    }, {
       walls: [
         { x: 1, y: 10, l: 73, a: "x" },
         { x: 63, y: 11, l: 27, a: "y" },
@@ -116,12 +127,12 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       goal: { x: 5, y: 15 },
       startpos: [5, 5],
-    }//,
-    //{}, {}, {}, {}, {}, {}, {}, {}
+    }//, {}, {}, {}, {}, {}, {}, {}, {}
   ],
-  stroke = false;
+  stroke = false,
+  { PI, sqrt, min, max, ceil, floor, round, abs, sin, cos } = Math;
 
-const wait = t => new Promise(s => setTimeout(s, Math.floor(t)));
+const wait = t => new Promise(s => setTimeout(s, floor(t)));
 canv.width = w * pix;
 canv.height = h * pix;
 
@@ -146,7 +157,8 @@ var mat = [],
     { x: 0, y: h - 1, a: "x", l: w },
     { x: 0, y: 0, a: "y", l: h },
     { x: w - 1, y: 0, a: "y", l: h }
-  ];
+  ],
+  loaddir = 1;
 
 load();
 
@@ -371,7 +383,7 @@ function render() {
   if (held.backspace) return;
   switch (view) {
     case "ingame":
-      let cdis = Math.sqrt((pos[0] - cur[0]) ** 2 + (pos[1] - cur[1]) ** 2);
+      let cdis = sqrt((pos[0] - cur[0]) ** 2 + (pos[1] - cur[1]) ** 2);
       // CONTROLS
       if ((held.r || held[7]) && !vel[0] && !vel[1]) {
         play("blip3");
@@ -389,17 +401,17 @@ function render() {
       if ((held.w || held[8]) && cur[1] > 0) cur[1]--;
       if ((held.s || held[2]) && cur[1] < h - 1) cur[1]++;
       let dis = [cur[0] - pos[0], cur[1] - pos[1]];
+      let loading = false;
       if (
         (held[" "] || held[5]) &&
         !vel[0] && !vel[1] &&
-        cdis < maxdis &&
-        hitf < force
+        cdis < maxdis
       ) {
-        hitf += 0.125;
-        if (tick % 2)
-          for (i = 0; i < hitf / 0.125; i++) {
-            mat[i][h - 1] = 0;
-          }
+        console.log(hitf, force, loaddir);
+        if (hitf < force && loaddir > 0 || hitf > 0 && loaddir < 0) hitf += loaddir * 0.125
+        else loaddir = -loaddir;
+        // console.log(hitf, force, loaddir);
+        loading = true;
       };
       if (hitf && !(held[" "] || held[5])) {
         console.log(hitf, dis, force);
@@ -411,7 +423,7 @@ function render() {
       }
 
       // MOVEMENT
-      vel = vel.map(n => Math.abs(n) < .3 ? 0 : n * fric);
+      vel = vel.map(n => abs(n) < .3 ? 0 : n * fric);
       let tpos = pos;
 
       // WALLS
@@ -426,7 +438,7 @@ function render() {
               }
               if (
                 (vel[0] || vel[1]) &&
-                Math.abs(pos[1] - w.y) < 2 &&
+                abs(pos[1] - w.y) < 2 &&
                 pos[0] > w.x - 1 &&
                 pos[0] < w.x + w.l + 1 &&
                 (vel[1] < 0) !== (pos[1] - w.y < 0)
@@ -440,7 +452,7 @@ function render() {
               }
               if (
                 (vel[0] || vel[1]) &&
-                Math.abs(pos[0] - w.x) < 2 &&
+                abs(pos[0] - w.x) < 2 &&
                 pos[1] > w.y - 1 &&
                 pos[1] < w.y + w.l + 1 &&
                 (vel[0] < 0) !== (pos[0] - w.x < 0)
@@ -460,18 +472,36 @@ function render() {
       // if (pos[1] - cam[1] > h - 5 && !!cam[1]) cam[1]++;
       // more remnants
 
+      if (tick % 2 && loading) {
+        fill(0, h - 1, hitf * 8, h - 1, 0);
+      }
+
+      if ((tick % 6) && !vel[0] && !vel[1]) {
+        let t = tick % 20 / 20 * PI;
+        try {
+          mat[min(w - 1, max(0, round(sin(t) * maxdis + pos[0])))]
+          [min(h - 1, max(0, round(cos(t) * maxdis + pos[1])))] = 1
+          mat[min(w - 1, max(0, round(sin(t) * maxdis + pos[0])))]
+          [min(h - 1, max(0, round(cos(t) * maxdis + pos[1])))];
+
+          mat[min(w - 1, max(0, round(-sin(t) * maxdis + pos[0])))]
+          [min(h - 1, max(0, round(-cos(t) * maxdis + pos[1])))] = 1 -
+            mat[min(w - 1, max(0, round(-sin(t) * maxdis + pos[0])))]
+            [min(h - 1, max(0, round(-cos(t) * maxdis + pos[1])))];
+        } catch { };
+      }
       if (
-        Math.abs(levels[clevel].goal.x - pos[0]) < 1.5 &&
-        Math.abs(levels[clevel].goal.y - pos[1]) < 1.5 &&
-        Math.abs(vel[0]) + Math.abs(vel[1]) < goalvel
+        abs(levels[clevel].goal.x - pos[0]) < 1.5 &&
+        abs(levels[clevel].goal.y - pos[1]) < 1.5 &&
+        abs(vel[0]) + abs(vel[1]) < goalvel
       ) return goal();
 
       // DRAW BALL, CURSOR AND GOAL
-      mat[Math.round(pos[0])][Math.round(pos[1])] = 1;
-      mat[Math.round(pos[0]) - 1][Math.round(pos[1])] = 1;
-      mat[Math.round(pos[0]) + 1][Math.round(pos[1])] = 1;
-      mat[Math.round(pos[0])][Math.round(pos[1]) + 1] = 1;
-      mat[Math.round(pos[0])][Math.round(pos[1]) - 1] = 1;
+      mat[round(pos[0])][round(pos[1])] = 1;
+      mat[round(pos[0]) - 1][round(pos[1])] = 1;
+      mat[round(pos[0]) + 1][round(pos[1])] = 1;
+      mat[round(pos[0])][round(pos[1]) + 1] = 1;
+      mat[round(pos[0])][round(pos[1]) - 1] = 1;
 
       mat[levels[clevel].goal.x - 1][levels[clevel].goal.y] = 1;
       mat[levels[clevel].goal.x + 1][levels[clevel].goal.y] = 1;
@@ -479,7 +509,7 @@ function render() {
       mat[levels[clevel].goal.x][levels[clevel].goal.y - 1] = 1;
 
       if (!vel[0] && !vel[1])
-        mat[Math.round(cur[0])][Math.round(cur[1])] =
+        mat[round(cur[0])][round(cur[1])] =
           (tick % ((cdis < maxdis) ? 4 : 2))
             ? 1 : 0;
 
@@ -497,17 +527,17 @@ function render() {
       levels.forEach((l, i) => {
         fill(
           ((i % 5) * 15) + 5,
-          (Math.floor(i / 5) * 15) + 3,
+          (floor(i / 5) * 15) + 3,
           ((i % 5) * 15) + 17,
-          (Math.floor(i / 5) * 15) + 15,
+          (floor(i / 5) * 15) + 15,
           1
         )
         if (sel !== i) {
           fill(
             (i % 5) * 15 + 6,
-            Math.floor(i / 5) * 15 + 4,
+            floor(i / 5) * 15 + 4,
             (i % 5) * 15 + 16,
-            Math.floor(i / 5) * 15 + 14,
+            floor(i / 5) * 15 + 14,
             0
           )
         }
@@ -516,14 +546,14 @@ function render() {
           drawchar(
             (i + 1).toString(),
             (i % 5) * 15 + 8,
-            (Math.floor(i / 5) * 15) + (sel == i ? 3 : 6),
+            (floor(i / 5) * 15) + (sel == i ? 3 : 6),
             sel !== i
           )
           if (sel == i)
             drawchar(
               hits[i].toString(),
               (i % 5) * 15 + 8,
-              (Math.floor(i / 5) * 15) + (sel == i ? 9 : 6),
+              (floor(i / 5) * 15) + (sel == i ? 9 : 6),
               sel !== i
             )
         }
