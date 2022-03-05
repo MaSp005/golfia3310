@@ -8,13 +8,17 @@ Shoot: Space / Numpad 5
 Reset: R / Numpad 7  
 Return to menu: Q / Numpad 9
 
+## Mobile Controls
+In the menu, tap a level to select it and tap it again to enter the level.
+While in game, tap anywhere to set your cursor. Tap the bottom right corner to start winding up your show and tap again to release and shoot!
+Tapping in the top left corner brings you back to the menu and the top right corner resets your ball position
+
 ## Upcoming Changes
 * More levels
 * Vertical Movement
 * Diagonal Walls
 * Larger levels with camera movement
 * a better and built-in level editor
-* Mobile Support
 
 ## Level Editor
 This is the editor I use to make the levels. It is everything but polished or finished but if you still want to try to create your own courses, here you go: (Its complicated)
