@@ -587,8 +587,8 @@ function render() {
 render();
 
 if (mobile) document.addEventListener("click", e => { // mobile controls
-  let x = floor(e.clientX / pix);
-  let y = floor(e.clientY / pix);
+  let x = floor(e.layerX / pix);
+  let y = floor(e.layerY / pix);
   console.log(x, y);
   switch(view){
     case "ingame":
