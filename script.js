@@ -53,6 +53,15 @@ const canv = document.getElementsByTagName("canvas")[0],
       ],
       startpos: [5, h / 2],
       goal: { x: 64, y: h / 2 }
+    },
+    {
+      walls: [
+        { x: 1, y: 25, l: 72, a: "x" },
+        { x: 1, y: 35, l: 82, a: "x" },
+        { x: 1, y: 15, l: 82, a: "x" }
+      ],
+      startpos: [5, h / 2 + 6],
+      goal: { x: 5, y: h / 2 - 4 }
     }, {
       walls: [
         { x: 1, y: 16, l: 21, a: "x" },
@@ -130,7 +139,8 @@ const canv = document.getElementsByTagName("canvas")[0],
     }//, {}, {}, {}, {}, {}, {}, {}, {}
   ],
   stroke = false,
-  { PI, sqrt, min, max, ceil, floor, round, abs, sin, cos } = Math;
+  { PI, sqrt, min, max, ceil, floor, round, abs, sin, cos } = Math,
+  mobile = !!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 
 const wait = t => new Promise(s => setTimeout(s, floor(t)));
 canv.width = w * pix;
@@ -158,7 +168,8 @@ var mat = [],
     { x: 0, y: 0, a: "y", l: h },
     { x: w - 1, y: 0, a: "y", l: h }
   ],
-  loaddir = 1;
+  loaddir = 1
+;
 
 load();
 
@@ -362,6 +373,7 @@ function loadlevel(l) {
     { x: (levels[clevel].w || w) - 1, y: 0, a: "y", l: (levels[clevel].h || h) }
   ];
   pos = Array.from(levels[clevel].startpos);
+  cur = Array.from(levels[clevel].startpos);
 }
 
 function save() {
@@ -422,6 +434,9 @@ function render() {
         console.log(vel);
       }
 
+      if (mobile) held.r = false;
+      if (mobile) held.q = false;
+
       // MOVEMENT
       vel = vel.map(n => abs(n) < .3 ? 0 : n * fric);
       let tpos = pos;
@@ -472,9 +487,8 @@ function render() {
       // if (pos[1] - cam[1] > h - 5 && !!cam[1]) cam[1]++;
       // more remnants
 
-      if (tick % 2 && loading) {
-        fill(0, h - 1, hitf * 8, h - 1, 0);
-      }
+      if (tick % 2 && loading) fill(0, h - 1, hitf * 8, h - 1, 0);
+      if (loading) mat[41][h - 1] = 0;
 
       if ((tick % 6) && !vel[0] && !vel[1]) {
         let t = tick % 20 / 20 * PI;
@@ -508,10 +522,13 @@ function render() {
       mat[levels[clevel].goal.x][levels[clevel].goal.y + 1] = 1;
       mat[levels[clevel].goal.x][levels[clevel].goal.y - 1] = 1;
 
+      if (mobile) fill(w - 5, h - 5, w - 1, h - 1, 1)
+      if (mobile) fill(w - 5, 0, w - 1, 4, 1)
+      if (mobile) fill(0, 0, 4, 4, 1)
+
       if (!vel[0] && !vel[1])
         mat[round(cur[0])][round(cur[1])] =
-          (tick % ((cdis < maxdis) ? 4 : 2))
-            ? 1 : 0;
+          (tick % ((cdis < maxdis) ? 4 : 2)) ? 1 : 0;
 
       break;
     case "menu":
@@ -524,7 +541,7 @@ function render() {
         clevel = sel;
         loadlevel();
       }
-      levels.forEach((l, i) => {
+      levels.forEach((_l, i) => {
         fill(
           ((i % 5) * 15) + 5,
           (floor(i / 5) * 15) + 3,
@@ -569,5 +586,40 @@ function render() {
 };
 render();
 
-document.addEventListener("keydown", e => held[e.key.toLowerCase()] = true);
-document.addEventListener("keyup", e => held[e.key.toLowerCase()] = false);
+if (mobile) document.addEventListener("click", e => { // mobile controls
+  let x = floor(e.clientX / pix);
+  let y = floor(e.clientY / pix);
+  console.log(x, y);
+  switch(view){
+    case "ingame":
+      if (held[" "]) return held[" "] = false;
+      if (x > w - 5 && y > h - 5) {
+        held[" "] = true;
+      } else if (x > w - 5 && y < 5) {
+        held.r = true;
+      } else if (x < 5 && y < 5) {
+        held.q = true;
+      } else {
+        cur = [x, y]
+      }
+      break;
+    case "menu":
+      // ((i % 5) * 15) + 5,
+      //   (floor(i / 5) * 15) + 3,
+      //   ((i % 5) * 15) + 17,
+      //   (floor(i / 5) * 15) + 15,
+      let sx = floor((x - 5) / 15);
+      let sy = floor((y - 3) / 15);
+      let s = sx + sy * 5;
+      console.log(sx, sy, s);
+      if (sel == s) {
+        play("negative2");
+        clevel = sel;
+        loadlevel();
+      } else sel = s;
+      break;
+  }
+});
+
+if (!mobile) document.addEventListener("keydown", e => held[e.key.toLowerCase()] = true);
+if (!mobile) document.addEventListener("keyup", e => held[e.key.toLowerCase()] = false);
